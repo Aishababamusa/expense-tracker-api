@@ -1,5 +1,6 @@
 const express = require('express');
 const pool = require('./config/database');
+const expenseRoutes = require('./routes/expenseRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -8,10 +9,13 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse JSON
 app.use(express.json());
 
-// Test route
+// Routes
 app.get('/', (req, res) => {
   res.json({ message: 'Expense Tracker API is running!' });
 });
+
+// Expense routes
+app.use('/api/expenses', expenseRoutes);
 
 // Test database connection route
 app.get('/test-db', async (req, res) => {
@@ -33,3 +37,4 @@ app.get('/test-db', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
