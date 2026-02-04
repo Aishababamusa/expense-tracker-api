@@ -1,10 +1,12 @@
 const expenseModel = require('../models/expenseModel');
 
 const expenseController = {
-  // Get all expenses
+  // Get all expenses (MODIFIED)
   getAllExpenses: async (req, res) => {
     try {
-      const expenses = await expenseModel.getAllExpenses();
+      const userId = req.user.id; // Get logged-in user's ID
+      const expenses = await expenseModel.getAllExpenses(userId);
+      
       res.status(200).json({
         success: true,
         count: expenses.length,
@@ -19,20 +21,22 @@ const expenseController = {
     }
   },
 
-  // Create new expense
+  // Create new expense (MODIFIED)
   createExpense: async (req, res) => {
     try {
-      const { user_id, type_id, amount, description, date } = req.body;
+      const userId = req.user.id; // Get logged-in user's ID
+      const { type_id, amount, description, date } = req.body;
 
-      if (!user_id || !type_id || !amount || !date) {
+      // No need for user_id in body - we get it from the token!
+      if (!type_id || !amount || !date) {
         return res.status(400).json({
           success: false,
-          message: 'Please provide user_id, type_id, amount, and date'
+          message: 'Please provide type_id, amount, and date'
         });
       }
 
       const newExpense = await expenseModel.createExpense(
-        user_id, 
+        userId,  // Use logged-in user's ID
         type_id, 
         amount, 
         description, 
@@ -53,17 +57,18 @@ const expenseController = {
     }
   },
 
-  // Get single expense by ID
+  // Get single expense by ID (MODIFIED)
   getExpenseById: async (req, res) => {
     try {
       const { id } = req.params;
+      const userId = req.user.id; // Get logged-in user's ID
 
-      const expense = await expenseModel.getExpenseById(id);
+      const expense = await expenseModel.getExpenseById(id, userId);
 
       if (!expense) {
         return res.status(404).json({
           success: false,
-          message: `Expense with ID ${id} not found`
+          message: `Expense with ID ${id} not found or you don't have access to it`
         });
       }
 
@@ -80,10 +85,11 @@ const expenseController = {
     }
   },
 
-  // Update expense by ID
+  // Update expense by ID (MODIFIED)
   updateExpense: async (req, res) => {
     try {
       const { id } = req.params;
+      const userId = req.user.id; // Get logged-in user's ID
       const { type_id, amount, description, date } = req.body;
 
       if (!type_id || !amount || !date) {
@@ -93,16 +99,19 @@ const expenseController = {
         });
       }
 
-      const existingExpense = await expenseModel.getExpenseById(id);
+      // Check if expense exists and belongs to user
+      const existingExpense = await expenseModel.getExpenseById(id, userId);
       if (!existingExpense) {
         return res.status(404).json({
           success: false,
-          message: `Expense with ID ${id} not found`
+          message: `Expense with ID ${id} not found or you don't have access to it`
         });
       }
 
+      // Update the expense
       const updatedExpense = await expenseModel.updateExpense(
         id,
+        userId,
         type_id,
         amount,
         description,
@@ -123,22 +132,23 @@ const expenseController = {
     }
   },
 
-  // Delete expense by ID (ADD THIS)
+  // Delete expense by ID (MODIFIED)
   deleteExpense: async (req, res) => {
     try {
       const { id } = req.params;
+      const userId = req.user.id; // Get logged-in user's ID
 
-      // Check if expense exists first
-      const existingExpense = await expenseModel.getExpenseById(id);
+      // Check if expense exists and belongs to user
+      const existingExpense = await expenseModel.getExpenseById(id, userId);
       if (!existingExpense) {
         return res.status(404).json({
           success: false,
-          message: `Expense with ID ${id} not found`
+          message: `Expense with ID ${id} not found or you don't have access to it`
         });
       }
 
       // Delete the expense
-      const deletedExpense = await expenseModel.deleteExpense(id);
+      const deletedExpense = await expenseModel.deleteExpense(id, userId);
 
       res.status(200).json({
         success: true,

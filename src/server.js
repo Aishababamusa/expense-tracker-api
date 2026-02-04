@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('./config/database');
 const expenseRoutes = require('./routes/expenseRoutes');
+const authRoutes = require('./routes/authRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -16,6 +17,9 @@ app.get('/', (req, res) => {
 
 // Expense routes
 app.use('/api/expenses', expenseRoutes);
+
+// Auth routes (ADD THIS)
+app.use('/api/auth', authRoutes);
 
 // Test database connection route
 app.get('/test-db', async (req, res) => {

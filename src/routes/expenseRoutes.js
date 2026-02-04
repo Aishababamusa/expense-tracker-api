@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const expenseController = require('../controllers/expenseController');
+const authMiddleware = require('../middleware/authMiddleware');
+
+// Protect all routes with authentication middleware
+router.use(authMiddleware); 
 
 // GET all expenses
 router.get('/', expenseController.getAllExpenses);
