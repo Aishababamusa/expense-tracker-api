@@ -6,6 +6,15 @@ const authMiddleware = require('../middleware/authMiddleware');
 // Protect all routes with authentication middleware
 router.use(authMiddleware); 
 
+// Statistics routes (PUT THESE FIRST, before /:id routes)
+router.get('/stats/total', expenseController.getTotalSpending);
+router.get('/stats/by-category', expenseController.getSpendingByCategory);
+
+// Filter and search routes
+router.get('/filter/date-range', expenseController.getExpensesByDateRange);
+router.get('/filter/type', expenseController.getExpensesByType);
+router.get('/search', expenseController.searchExpenses);
+
 // GET all expenses
 router.get('/', expenseController.getAllExpenses);
 

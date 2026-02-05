@@ -162,7 +162,142 @@ const expenseController = {
         error: error.message
       });
     }
+  },
+  // Filter by date range
+  getExpensesByDateRange: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { startDate, endDate } = req.query;
+
+      if (!startDate || !endDate) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide both startDate and endDate'
+        });
+      }
+
+      const expenses = await expenseModel.getExpensesByDateRange(userId, startDate, endDate);
+
+      res.status(200).json({
+        success: true,
+        count: expenses.length,
+        data: expenses
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error filtering expenses',
+        error: error.message
+      });
+    }
+  },
+
+  // Filter by type/category
+  getExpensesByType: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { typeId } = req.query;
+
+      if (!typeId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide typeId'
+        });
+      }
+
+      const expenses = await expenseModel.getExpensesByType(userId, typeId);
+
+      res.status(200).json({
+        success: true,
+        count: expenses.length,
+        data: expenses
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error filtering expenses by type',
+        error: error.message
+      });
+    }
+  },
+
+  // Search expenses
+  searchExpenses: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { q } = req.query; // 'q' is common for search queries
+
+      if (!q) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide search term (q)'
+        });
+      }
+
+      const expenses = await expenseModel.searchExpenses(userId, q);
+
+      res.status(200).json({
+        success: true,
+        count: expenses.length,
+        data: expenses
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error searching expenses',
+        error: error.message
+      });
+    }
+  },
+
+  // Get total spending
+  getTotalSpending: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { startDate, endDate } = req.query;
+
+      const total = await expenseModel.getTotalSpending(userId, startDate, endDate);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          total: total,
+          period: startDate && endDate ? { startDate, endDate } : 'all time'
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error calculating total spending',
+        error: error.message
+      });
+    }
+  },
+
+  // Get spending by category
+  getSpendingByCategory: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { startDate, endDate } = req.query;
+
+      const categorySpending = await expenseModel.getSpendingByCategory(userId, startDate, endDate);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          categories: categorySpending,
+          period: startDate && endDate ? { startDate, endDate } : 'all time'
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error getting spending by category',
+        error: error.message
+      });
+    }
   }
 };
+
 
 module.exports = expenseController;

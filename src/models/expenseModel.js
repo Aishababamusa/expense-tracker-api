@@ -66,7 +66,7 @@ const expenseModel = {
     }
   },
 
-  // Update expense by ID for a specific user (MODIFIED)
+  // Update expense by ID for a specific user 
   updateExpense: async (id, userId, type_id, amount, description, date) => {
     try {
       const query = `
@@ -83,7 +83,7 @@ const expenseModel = {
     }
   },
 
-  // Delete expense by ID for a specific user (MODIFIED)
+  // Delete expense by ID for a specific user 
   deleteExpense: async (id, userId) => {
     try {
       const query = `
@@ -96,7 +96,131 @@ const expenseModel = {
     } catch (error) {
       throw error;
     }
+  },
+  // Filter expenses by date range
+  getExpensesByDateRange: async (userId, startDate, endDate) => {
+    try {
+      const query = `
+        SELECT 
+          expenses.id,
+          expenses.amount,
+          expenses.description,
+          expenses.date,
+          types.name AS type,
+          expenses.created_at
+        FROM expenses
+        JOIN types ON expenses.type_id = types.id
+        WHERE expenses.user_id = $1 
+          AND expenses.date >= $2 
+          AND expenses.date <= $3
+        ORDER BY expenses.date DESC
+      `;
+      const result = await pool.query(query, [userId, startDate, endDate]);
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Filter expenses by type/category
+  getExpensesByType: async (userId, typeId) => {
+    try {
+      const query = `
+        SELECT 
+          expenses.id,
+          expenses.amount,
+          expenses.description,
+          expenses.date,
+          types.name AS type,
+          expenses.created_at
+        FROM expenses
+        JOIN types ON expenses.type_id = types.id
+        WHERE expenses.user_id = $1 AND expenses.type_id = $2
+        ORDER BY expenses.date DESC
+      `;
+      const result = await pool.query(query, [userId, typeId]);
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Search expenses by description
+  searchExpenses: async (userId, searchTerm) => {
+    try {
+      const query = `
+        SELECT 
+          expenses.id,
+          expenses.amount,
+          expenses.description,
+          expenses.date,
+          types.name AS type,
+          expenses.created_at
+        FROM expenses
+        JOIN types ON expenses.type_id = types.id
+        WHERE expenses.user_id = $1 
+          AND expenses.description ILIKE $2
+        ORDER BY expenses.date DESC
+      `;
+      const result = await pool.query(query, [userId, `%${searchTerm}%`]);
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get total spending for a user
+  getTotalSpending: async (userId, startDate = null, endDate = null) => {
+    try {
+      let query = `
+        SELECT COALESCE(SUM(amount), 0) as total
+        FROM expenses
+        WHERE user_id = $1
+      `;
+      const values = [userId];
+
+      // Add date filters if provided
+      if (startDate && endDate) {
+        query += ` AND date >= $2 AND date <= $3`;
+        values.push(startDate, endDate);
+      }
+
+      const result = await pool.query(query, values);
+      return parseFloat(result.rows[0].total);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get spending by category
+  getSpendingByCategory: async (userId, startDate = null, endDate = null) => {
+    try {
+      let query = `
+        SELECT 
+          types.name AS category,
+          COALESCE(SUM(expenses.amount), 0) AS total,
+          COUNT(expenses.id) AS count
+        FROM expenses
+        JOIN types ON expenses.type_id = types.id
+        WHERE expenses.user_id = $1
+      `;
+      const values = [userId];
+
+      // Add date filters if provided
+      if (startDate && endDate) {
+        query += ` AND expenses.date >= $2 AND expenses.date <= $3`;
+        values.push(startDate, endDate);
+      }
+
+      query += ` GROUP BY types.name ORDER BY total DESC`;
+
+      const result = await pool.query(query, values);
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
   }
+
 };
 
 module.exports = expenseModel;
