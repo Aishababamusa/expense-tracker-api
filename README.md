@@ -11,7 +11,7 @@ This is my second backend project, built as part of my journey to becoming a pro
 - Write clean, maintainable, and well-structured code
 - Build real-world features that users actually need
 
-**Project Timeline:** [Add dates - e.g., January 2026 - February 2026]
+**Project Timeline:** [21st January 2026 - 4th February 2026]
 
 ## ✨ Features
 
@@ -323,8 +323,8 @@ Ideas for future improvements:
 
 **Aisha Baba Musa**
 - Email: aishababamusa103@gmail.com
-- GitHub: [@YOUR_GITHUB_USERNAME](https://github.com/YOUR_USERNAME)
-- LinkedIn: [Your LinkedIn Profile](https://linkedin.com/in/your-profile) *(if you have one)*
+- GitHub: [@YOUR_GITHUB_USERNAME](https://github.com/Aishababmusa)
+- LinkedIn: [Your LinkedIn Profile](https://linkedin.com/in/aishababamusa) 
 
 ## 📝 License
 
